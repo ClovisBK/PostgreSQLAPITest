@@ -1,0 +1,48 @@
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+.vscode/
+
+# ASP.NET Core
+appsettings.Development.json
+appsettings.Production.json
+
+# Important: Your secrets file
+**/appsettings.json
+
+# Entity Framework
+Migrations/*.Designer.cs
+
+# Logs
+*.log
+*.logs
+
+# dotnet tools
+.dotnet/
+tools/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
