@@ -19,7 +19,7 @@ if (!string.IsNullOrEmpty(databaseUrl))
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
     var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};" +
-                          $"Username={userInfo[0]};Password={userInfo[1]};SslMode=Require;TrustServerCertificate=true";
+                          $"Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;TrustServerCertificate=true";
 
     builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 }
@@ -46,7 +46,36 @@ app.MapControllers();
 // Auto-migrate
 using (var scope = app.Services.CreateScope())
 {
-    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    try
+    {
+        Console.WriteLine("Starting database migration...");
+        dbContext.Database.Migrate();
+        Console.WriteLine("Database migration completed successfully!");
+
+        // Optional: Verify Products table exists
+        var tableExists = dbContext.Database.ExecuteSqlRaw(
+            "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'Products')");
+        Console.WriteLine($"Products table exists check completed");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"ERROR applying migrations: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+
+        // Fallback: Try EnsureCreated as emergency
+        try
+        {
+            Console.WriteLine("Attempting EnsureCreated as fallback...");
+            dbContext.Database.EnsureCreated();
+            Console.WriteLine("Database created via EnsureCreated");
+        }
+        catch (Exception ex2)
+        {
+            Console.WriteLine($"EnsureCreated also failed: {ex2.Message}");
+        }
+        throw; // Re-throw to prevent app from starting with broken DB
+    }
 }
 
 app.Run();
